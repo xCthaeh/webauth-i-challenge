@@ -42,7 +42,36 @@ server.get('/api/logout', (req, res) => {
   } 
 });
 
+server.post('/api/login', (req, res) => {
+  const creds = req.body;
 
+  db('users')
+      .where({username: creds.username})
+      .first()
+      .then(user => {
+        if (user && bcrypt.compareSync(creds.password, user.password)) {
+            req.session.userId = user.id;
+          res.status(200).json({ message: 'Login was successful.' });
+        } else {
+          res.status(401).json({ message: 'You shall not pass!' });
+        }
+      })
+      .catch(err => res.json(err));
+  });
+
+
+server.post('/api/register', (req, res) => {
+  const creds = req.body;
+  const hash = bcrypt.hashSync(creds.password, 4); 
+  creds.password = hash;
+
+  db('users')
+    .insert(creds)
+    .then(ids => {
+      res.status(201).json(ids);
+    })
+    .catch(err => json(err));
+});
 server.listen(port, () => {
   console.log(`Server is running on ... ${port}`);
 });
