@@ -8,6 +8,26 @@ const port = 8000;
 
 const server = express();
 
+const sessionConfig = {
+  secret: 'this is my secret',
+  cookie: {
+      maxAge: 1000 * 60 * 10,
+      secure: false
+  },
+  httpOnly: true,
+  resave: false,
+  saveUninitialized: false
+  store: new KnexSessionStore({
+    tablename: 'sessions',
+    seedfieldname: 'sid',
+    knex: db,
+    createtable: true,
+    clearInterval: 1000 * 60 * 60
+}
+
+server.use(session(sessionConfig))
+server.use(express.json());
+server.use(cors());
 
 server.get('/api/me', protected, (req, res) => {
   db('users')
