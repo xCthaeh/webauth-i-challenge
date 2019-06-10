@@ -29,6 +29,15 @@ server.use(session(sessionConfig))
 server.use(express.json());
 server.use(cors());
 
+
+function protected(req, res, next) {
+  if (req.session && req.session.user) {
+    next();
+  } else {
+    res.status(401).json({ you: 'You shall not pass!' });
+  }
+}
+
 server.get('/api/me', protected, (req, res) => {
   db('users')
   .select('id', 'username', 'password')
